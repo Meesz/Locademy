@@ -28,7 +28,10 @@ import type {
   CourseWithRelations,
   VideoWithRelations,
 } from "../lib/types";
-import { getHandle, validateHandle } from "../services/video-service";
+import {
+  loadVideoSource,
+  type VideoPlaybackSource,
+} from "../services/video-service";
 import { updateCourse } from "../services/library-service";
 import { useSettings } from "../state/settings-context-classes";
 import { buttonClasses } from "../components/ui/button-classes";
@@ -85,9 +88,8 @@ export function PlayerPage() {
   const [duration, setDuration] = useState<number | null>(
     video?.durationSec ?? null
   );
-  const [fileHandle, setFileHandle] = useState<FileSystemFileHandle | null>(
-    null
-  );
+  const [playbackSource, setPlaybackSource] =
+    useState<VideoPlaybackSource | null>(null);
   const saveTimeoutRef = useRef<number | null>(null);
   const hasMarkedCompleteRef = useRef<boolean>(
     video?.progress?.completed ?? false
@@ -124,47 +126,70 @@ export function PlayerPage() {
     [cleanupUrl]
   );
 
-  const refreshSource = useCallback(async () => {
-    if (!video) return;
-    setLoadingSource(true);
-    let createdUrl: string | null = null;
-    try {
-      const status = await validateHandle(video.id);
-      if (status !== "ok") {
-        setError(
-          status === "missing"
-            ? "Video file is missing."
-            : "Permission required to access this file."
-        );
-        setRelinkOpen(true);
-        updateSource(null);
-        return;
-      }
-      const handle = await getHandle(video.id);
-      const file = await handle.getFile();
-      createdUrl = URL.createObjectURL(file);
-      setFileHandle(handle);
-      updateSource(createdUrl);
+  // Load the underlying file only when the file identity (id, fingerprint, handle) changes –
+  // not on every progress update that causes a new video object reference.
+  const refreshSource = useCallback(
+    async (v: VideoWithRelations) => {
+      setLoadingSource(true);
       setError(null);
-      setRelinkOpen(false);
-    } catch (err) {
-      console.error(err);
-      if (createdUrl) {
-        URL.revokeObjectURL(createdUrl);
+      let createdUrl: string | null = null;
+      try {
+        const result = await loadVideoSource(v.id);
+        if (result.status !== "ok" || !result.source) {
+          setError(
+            result.status === "missing"
+              ? "Video file is missing."
+              : "Permission required to access this file."
+          );
+          setRelinkOpen(true);
+          setPlaybackSource(null);
+          updateSource(null);
+          return;
+        }
+
+        createdUrl = URL.createObjectURL(result.source.file);
+        setPlaybackSource(result.source);
+        updateSource(createdUrl);
+        setError(null);
+        setRelinkOpen(false);
+      } catch (err) {
+        console.error(err);
+        if (createdUrl) {
+          URL.revokeObjectURL(createdUrl);
+        }
+        setError("Could not load video. It may require re-importing.");
+        setPlaybackSource(null);
+      } finally {
+        setLoadingSource(false);
       }
-      setError("Could not load video. It may require re-importing.");
-    } finally {
-      setLoadingSource(false);
-    }
-  }, [updateSource, video]);
+    },
+    [updateSource]
+  );
+
+  // Derive a primitive identity for when we should actually refresh the video source.
+  const videoSourceIdentity = useMemo(() => {
+    if (!video) return null;
+    const fp = video.fileFingerprint;
+    return [
+      video.id,
+      fp.size,
+      fp.lastModified,
+      fp.name,
+      // presence/absence of a handle may change permissions behavior
+      video.fileHandle ? 1 : 0,
+    ].join(":");
+  }, [video]);
 
   useEffect(() => {
-    refreshSource();
+    if (video && videoSourceIdentity) {
+      void refreshSource(video);
+    }
     return () => {
       cleanupUrl();
-      setFileHandle(null);
+      setPlaybackSource(null);
     };
-  }, [refreshSource, cleanupUrl]);
+    // Only run when the identity changes – not on every progress update.
+  }, [videoSourceIdentity, video, refreshSource, cleanupUrl]);
 
   useEffect(() => {
     return () => {
@@ -222,9 +247,10 @@ export function PlayerPage() {
         });
       }
     }
-    if (fileHandle && !video.posterBlobKey) {
+    if (playbackSource && !video.posterBlobKey) {
+      const thumbnailSource = playbackSource.handle ?? playbackSource.file;
       const { posterBlobKey, durationSec } = await generateAndStoreThumbnail(
-        fileHandle,
+        thumbnailSource,
         {
           secondsIntoVideo: Math.min(
             Math.max(video.progress?.lastPositionSec ?? 3, 2),
@@ -242,7 +268,7 @@ export function PlayerPage() {
         }
       }
     }
-  }, [video, fileHandle, course]);
+  }, [video, playbackSource, course]);
 
   const handleTimeUpdate = useCallback(() => {
     const element = videoRef.current;
@@ -285,11 +311,10 @@ export function PlayerPage() {
   }, [handleMarkCompleted, video]);
 
   const handleRelink = useCallback(
-    async (handle: FileSystemFileHandle) => {
+    async (source: FileSystemFileHandle | File) => {
       if (!video) return;
-      await relink(video.id, handle);
-      setFileHandle(handle);
-      await refreshSource();
+      await relink(video.id, source);
+      await refreshSource(video);
     },
     [refreshSource, video]
   );
@@ -344,7 +369,9 @@ export function PlayerPage() {
               !loadingSource && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center text-sm text-rose-300">
                   <p>{error ?? "Select the video file to continue."}</p>
-                  <Button onClick={() => refreshSource()}>Retry</Button>
+                  <Button onClick={() => video && refreshSource(video)}>
+                    Retry
+                  </Button>
                 </div>
               )
             )}

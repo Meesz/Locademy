@@ -5,35 +5,104 @@
  */
 
 import { liveQuery } from 'dexie'
-import { db, type StoredBlobEntity, type VideoEntity } from '../lib/db'
+import { db, type FileFingerprint, type StoredBlobEntity, type VideoEntity } from '../lib/db'
 import { createId } from '../lib/utils'
+import { getFileFingerprint } from '../lib/file-utils'
+import { getCachedVideoFile } from './video-source-cache'
 
 export async function getVideo(videoId: string): Promise<VideoEntity | undefined> {
   return db.videos.get(videoId)
 }
 
-export async function getHandle(videoId: string): Promise<FileSystemFileHandle> {
-  const video = await getVideo(videoId)
-  if (!video) {
-    throw new Error('Video not found')
+function fingerprintsEqual(a: FileFingerprint, b: FileFingerprint) {
+  return a.size === b.size && a.lastModified === b.lastModified && a.name === b.name
+}
+
+function fingerprintsLooselyEqual(a: FileFingerprint, b: FileFingerprint) {
+  return a.size === b.size && a.name === b.name
+}
+
+async function ensureFingerprint(videoId: string, current: VideoEntity, next: FileFingerprint) {
+  if (!fingerprintsEqual(current.fileFingerprint, next)) {
+    await updateVideo(videoId, {
+      fileFingerprint: next,
+      missing: false,
+    })
+  } else if (current.missing) {
+    await updateVideo(videoId, {
+      missing: false,
+    })
   }
-  return video.fileHandle
 }
 
 export type HandleValidationResult = 'ok' | 'missing' | 'no-permission'
 
-export async function validateHandle(videoId: string): Promise<HandleValidationResult> {
-  try {
-    const handle = await getHandle(videoId)
-    await handle.getFile()
-    return 'ok'
-  } catch (error) {
-    if (error instanceof DOMException) {
-      if (error.name === 'NotFoundError') return 'missing'
-      if (error.name === 'SecurityError' || error.name === 'NotAllowedError') return 'no-permission'
-    }
-    throw error
+export interface VideoPlaybackSource {
+  file: File
+  handle?: FileSystemFileHandle | null
+}
+
+export interface VideoLoadResult {
+  status: HandleValidationResult
+  source?: VideoPlaybackSource
+}
+
+export async function loadVideoSource(videoId: string): Promise<VideoLoadResult> {
+  const video = await getVideo(videoId)
+  if (!video) {
+    throw new Error('Video not found')
   }
+
+  let permissionError: HandleValidationResult | undefined
+
+  if (video.fileHandle) {
+    try {
+      const file = await video.fileHandle.getFile()
+      const fingerprint = await getFileFingerprint(file)
+      await ensureFingerprint(videoId, video, fingerprint)
+      return {
+        status: 'ok',
+        source: { file, handle: video.fileHandle },
+      }
+    } catch (error) {
+      if (error instanceof DOMException) {
+        if (error.name === 'NotAllowedError' || error.name === 'SecurityError') {
+          permissionError = 'no-permission'
+        } else if (error.name === 'NotFoundError') {
+          permissionError = 'missing'
+        } else {
+          throw error
+        }
+      } else {
+        throw error
+      }
+    }
+  }
+
+  const cached = getCachedVideoFile(videoId)
+  if (cached) {
+    const cachedFingerprint = await getFileFingerprint(cached)
+    if (
+      fingerprintsEqual(video.fileFingerprint, cachedFingerprint) ||
+      fingerprintsLooselyEqual(video.fileFingerprint, cachedFingerprint)
+    ) {
+      await ensureFingerprint(videoId, video, cachedFingerprint)
+      return {
+        status: 'ok',
+        source: { file: cached, handle: null },
+      }
+    }
+  }
+
+  if (permissionError === 'no-permission') {
+    return { status: 'no-permission' }
+  }
+
+  if (!video.missing) {
+    await updateVideo(videoId, { missing: true })
+  }
+
+  return { status: 'missing' }
 }
 
 export async function updateVideo(

@@ -23,6 +23,7 @@ import {
 } from "../lib/constants";
 import type { AppSettings } from "../lib/types";
 import { useSettings } from "../state/settings-context-classes";
+import { supportsDirectoryHandles } from "../lib/browser";
 
 export function SettingsPage() {
   const { settings, updateSettings } = useSettings();
@@ -60,6 +61,7 @@ export function SettingsPage() {
   };
 
   const thresholdPercent = Math.round(localSettings.completionThreshold * 100);
+  const hasPersistentHandles = supportsDirectoryHandles();
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -135,6 +137,32 @@ export function SettingsPage() {
           <Button variant="outline" onClick={handleReset}>
             Reset to defaults
           </Button>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Browser compatibility</CardTitle>
+          <CardDescription>
+            Locademy keeps everything local. Browser capabilities determine how often you need to relink files.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm text-slate-300">
+          {hasPersistentHandles ? (
+            <p>
+              Chromium-based browsers (Chrome, Edge, Brave, Arc) support persistent folder access. Once you import a
+              course, Locademy remembers the directory automatically.
+            </p>
+          ) : (
+            <p>
+              Firefox and other non-Chromium browsers rely on the standard file picker. After restarting the browser,
+              use the <strong>Relink course</strong> button or the per-video relink prompt to reconnect your files.
+            </p>
+          )}
+          <ul className="list-disc space-y-2 pl-5 text-xs text-slate-400">
+            <li>Your notes and progress stay intact during relinking.</li>
+            <li>When selecting files, choose the entire course folder if your browser allows it.</li>
+            <li>If a video is still unmatched, use the individual relink prompt from the player.</li>
+          </ul>
         </CardContent>
       </Card>
     </div>

@@ -1,30 +1,68 @@
-import { useState } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { NavLink } from "react-router";
 import { Button } from "../ui/button";
 import { useLibrary } from "../../state/library-context";
 import { cn } from "../../lib/utils";
-import { hasDirectoryPicker } from "../../lib/browser";
+import { supportsDirectoryHandles, supportsFilePicker } from "../../lib/browser";
 
 function isAbortError(error: unknown) {
   return error instanceof DOMException && error.name === "AbortError";
 }
 
 export function AppSidebar() {
-  const { courses, importCourse } = useLibrary();
+  const { courses, importCourse, importCourseFromFiles } = useLibrary();
   const [error, setError] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const supportsHandles = supportsDirectoryHandles(window);
+  const supportsPicker = supportsFilePicker(window);
+
+  useEffect(() => {
+    const input = fileInputRef.current;
+    if (input) {
+      input.setAttribute("webkitdirectory", "");
+      input.setAttribute("directory", "");
+      input.multiple = true;
+    }
+  }, []);
+
+  const handleFileSelection = async (
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+    setImporting(true);
+    setError(null);
+    try {
+      await importCourseFromFiles(files);
+    } catch (err) {
+      if (!isAbortError(err)) {
+        console.error(err);
+        setError("Could not import files. Please try again.");
+      }
+    } finally {
+      setImporting(false);
+    }
+  };
 
   const handleImport = async () => {
-    if (!hasDirectoryPicker(window)) {
-      setError("Your browser does not support directory access yet.");
-      return;
-    }
-
     try {
       setError(null);
-      setImporting(true);
-      const directoryHandle = await window.showDirectoryPicker();
-      await importCourse(directoryHandle);
+      if (supportsHandles) {
+        setImporting(true);
+        const directoryHandle = await window.showDirectoryPicker();
+        await importCourse(directoryHandle);
+      } else if (supportsPicker) {
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+          fileInputRef.current.click();
+        } else {
+          setError("File picker unavailable. Please try again.");
+        }
+        return;
+      } else {
+        setError("Your browser does not support file imports yet.");
+      }
     } catch (err) {
       if (!isAbortError(err)) {
         console.error(err);
@@ -39,9 +77,14 @@ export function AppSidebar() {
     <aside className="flex h-full w-72 flex-col border-r border-slate-800 bg-slate-950/80 p-4 backdrop-blur-lg">
       <div className="mb-6 space-y-3">
         <Button onClick={handleImport} loading={importing} className="w-full">
-          Import Course Folder
+          {supportsHandles ? "Import Course Folder" : "Import using file picker"}
         </Button>
         {error && <p className="text-sm text-rose-400">{error}</p>}
+        {!supportsHandles && supportsPicker && (
+          <p className="text-xs text-slate-500">
+            Select all the videos for your course. Firefox may prompt for file access each session.
+          </p>
+        )}
       </div>
       <nav className="flex flex-1 flex-col gap-6 overflow-y-auto pr-2">
         <div className="space-y-2">
@@ -104,6 +147,13 @@ export function AppSidebar() {
       <p className="mt-6 text-xs text-slate-600">
         Locademy stores everything locally. Your video files stay on disk.
       </p>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="video/*"
+        className="sr-only"
+        onChange={handleFileSelection}
+      />
     </aside>
   );
 }

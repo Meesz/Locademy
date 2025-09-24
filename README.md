@@ -21,6 +21,9 @@ It lets you import course folders from your computer, organize them into courses
 - Automatic thumbnails  
   Thumbnails generated on import.
 
+- Firefox-friendly relink flow  
+  Use the file picker to reconnect videos when the browser cannot persist folder access.
+
 - Notes per video  
   Markdown editor with live preview and autosave.
 
@@ -28,7 +31,7 @@ It lets you import course folders from your computer, organize them into courses
   Displays all courses with progress bars and a "Continue Watching" section.
 
 - Offline-first  
-  Uses IndexedDB and the File System Access API. Your files remain on disk.
+  Uses IndexedDB and browser file APIs. Your files remain on disk.
 
 ---
 
@@ -67,8 +70,16 @@ pnpm preview
 
 ### Browser Support
 
-- Chromium-based browsers (Chrome, Edge, Brave): full support with persistent file handles.
-- Firefox and Safari: fallback mode with manual re-linking of files when required.
+- **Chromium browsers (Chrome, Edge, Brave, Arc)** – Full experience using the File System Access API. Once you grant folder access, Locademy keeps a persistent handle so you rarely need to relink.
+- **Firefox** – Uses the standard file picker. After restarting the browser you may be asked to relink a course or an individual video. Progress, notes, and thumbnails stay in IndexedDB.
+- **Safari** – Similar to Firefox; use the file picker workflow to reconnect videos.
+
+### Relinking videos in Firefox/Safari
+
+1. Import a course by selecting the folder (or all the video files) when prompted.
+2. When a video cannot be opened after a restart, use the player’s **Relink video** prompt or the **Relink course** button on the course page.
+3. Locademy matches files by filename, size, and last modified time. Unmatched items fall back to the per-video relink dialog.
+4. Notes, thumbnails, and progress are preserved throughout the relinking process.
 
 ---
 

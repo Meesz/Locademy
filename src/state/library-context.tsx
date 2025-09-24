@@ -30,6 +30,7 @@ import {
 } from "../lib/db";
 import {
   importFromDirectory,
+  importFromFileList,
   deleteCourse as deleteCourseService,
 } from "../services/library-service";
 import type { ImportSummary } from "../lib/types";
@@ -46,6 +47,7 @@ interface LibraryContextValue {
   courses: CourseWithRelations[];
   loading: boolean;
   importCourse: (handle: FileSystemDirectoryHandle) => Promise<ImportSummary>;
+  importCourseFromFiles: (files: FileList | File[]) => Promise<ImportSummary>;
   deleteCourse: (courseId: string) => Promise<void>;
 }
 
@@ -197,6 +199,15 @@ export function LibraryProvider({ children }: PropsWithChildren) {
     []
   );
 
+  const importCourseFromFiles = useCallback(async (files: FileList | File[]) => {
+    setIsImporting(true);
+    try {
+      return await importFromFileList(files, { generateThumbnails: true });
+    } finally {
+      setIsImporting(false);
+    }
+  }, []);
+
   const deleteCourse = useCallback(async (courseId: string) => {
     await deleteCourseService(courseId);
   }, []);
@@ -206,9 +217,10 @@ export function LibraryProvider({ children }: PropsWithChildren) {
       courses,
       loading: snapshot == null || isImporting,
       importCourse,
+      importCourseFromFiles,
       deleteCourse,
     }),
-    [courses, snapshot, isImporting, importCourse, deleteCourse]
+    [courses, snapshot, isImporting, importCourse, importCourseFromFiles, deleteCourse]
   );
 
   return (

@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useRef, useState, type ChangeEvent } from 'react'
 import { Dialog, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog'
 import { Button } from './ui/button'
-import { hasFilePicker } from '../lib/browser'
+import { hasFilePicker, supportsFilePicker } from '../lib/browser'
 
 function isAbort(error: unknown) {
   return error instanceof DOMException && error.name === 'AbortError'
@@ -11,27 +11,52 @@ interface RelinkDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   videoTitle: string
-  onRelink: (handle: FileSystemFileHandle) => Promise<void>
+  onRelink: (source: FileSystemFileHandle | File) => Promise<void>
 }
 
 export function RelinkDialog({ open, onOpenChange, videoTitle, onRelink }: RelinkDialogProps) {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const triggerFileInput = () => {
+    if (!fileInputRef.current) return
+    fileInputRef.current.value = ''
+    fileInputRef.current.click()
+  }
+
+  const handleInputChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files
+    if (!files || files.length === 0) return
+    const [file] = files
+    setLoading(true)
+    setError(null)
+    try {
+      await onRelink(file)
+      onOpenChange(false)
+    } catch (err) {
+      console.error(err)
+      setError('Could not relink file. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handlePick = async () => {
-    if (!hasFilePicker(window)) {
-      setError('Your browser cannot relink files here. Please use a Chromium-based browser.')
-      return
-    }
-
     try {
-      setLoading(true)
       setError(null)
-      const [fileHandle] = await window.showOpenFilePicker({
-        multiple: false,
-      })
-      await onRelink(fileHandle)
-      onOpenChange(false)
+      if (hasFilePicker(window)) {
+        setLoading(true)
+        const [fileHandle] = await window.showOpenFilePicker({
+          multiple: false,
+        })
+        await onRelink(fileHandle)
+        onOpenChange(false)
+      } else if (supportsFilePicker(window)) {
+        triggerFileInput()
+      } else {
+        setError('Your browser cannot relink files here. Please use a Chromium-based browser.')
+      }
     } catch (err) {
       if (!isAbort(err)) {
         console.error(err)
@@ -66,6 +91,13 @@ export function RelinkDialog({ open, onOpenChange, videoTitle, onRelink }: Relin
           Choose file
         </Button>
       </DialogFooter>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="video/*"
+        className="sr-only"
+        onChange={handleInputChange}
+      />
     </Dialog>
   )
 }

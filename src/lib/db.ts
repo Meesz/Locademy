@@ -9,6 +9,7 @@ import Dexie, { type Table } from 'dexie'
 export interface FileFingerprint {
   size: number
   lastModified: number
+  name: string
   hash?: string
 }
 
@@ -34,8 +35,10 @@ export interface VideoEntity {
   moduleId?: string | null
   title: string
   order: number
-  fileHandle: FileSystemFileHandle
+  fileHandle?: FileSystemFileHandle | null
   fileFingerprint: FileFingerprint
+  relativePath?: string | null
+  missing?: boolean
   durationSec?: number
   posterBlobKey?: string
   createdAt: string

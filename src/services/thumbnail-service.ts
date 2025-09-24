@@ -4,6 +4,7 @@
  * @author Meesz
  */
 
+import { getFileFromSource, type FileSource } from '../lib/file-utils'
 import { storePosterBlob } from './video-service'
 
 export interface ThumbnailOptions {
@@ -24,11 +25,11 @@ function throwIfAborted(signal?: AbortSignal) {
 }
 
 async function captureFromVideo(
-  handle: FileSystemFileHandle,
+  source: FileSource,
   options: ThumbnailOptions,
 ): Promise<ThumbnailCaptureResult> {
   throwIfAborted(options.signal)
-  const file = await handle.getFile()
+  const file = await getFileFromSource(source)
   throwIfAborted(options.signal)
   const url = URL.createObjectURL(file)
   const video = document.createElement('video')
@@ -89,17 +90,17 @@ async function captureFromVideo(
 }
 
 export async function generateThumbnailBlob(
-  handle: FileSystemFileHandle,
+  source: FileSource,
   options: ThumbnailOptions = {},
 ): Promise<ThumbnailCaptureResult> {
-  return captureFromVideo(handle, options)
+  return captureFromVideo(source, options)
 }
 
 export async function generateAndStoreThumbnail(
-  handle: FileSystemFileHandle,
+  source: FileSource,
   options: ThumbnailOptions = {},
 ): Promise<{ posterBlobKey?: string; durationSec?: number }> {
-  const { blob, duration } = await generateThumbnailBlob(handle, options)
+  const { blob, duration } = await generateThumbnailBlob(source, options)
   let posterBlobKey: string | undefined
   if (blob) {
     posterBlobKey = await storePosterBlob(blob)

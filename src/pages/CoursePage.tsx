@@ -4,7 +4,7 @@
  * @author Meesz
  */
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { useLibrary } from "../state/library-context";
 import { computeCourseProgress, isVideoCompleted } from "../lib/progress";
@@ -14,6 +14,8 @@ import { ModuleSection } from "../components/ModuleSection";
 import { VideoRow } from "../components/VideoRow";
 import { formatDuration } from "../lib/utils";
 import { buttonClasses } from "../components/ui/button-classes";
+import { RelinkCourseDialog } from "../components/RelinkCourseDialog";
+import { supportsDirectoryHandles } from "../lib/browser";
 
 export function CoursePage() {
   const params = useParams<{ courseId: string }>();
@@ -21,6 +23,7 @@ export function CoursePage() {
   const navigate = useNavigate();
   const { courses, deleteCourse } = useLibrary();
   const course = courses.find((item) => item.id === courseId);
+  const [relinkOpen, setRelinkOpen] = useState(false);
 
   const coverUrl = usePosterUrl(course?.coverBlobKey);
 
@@ -43,6 +46,10 @@ export function CoursePage() {
   const firstIncomplete = course.videos.find(
     (video) => !isVideoCompleted(video)
   );
+
+  const canUseHandles = supportsDirectoryHandles();
+  const needsRelink = course.videos.some((video) => video.missing);
+  const showRelinkButton = !canUseHandles || needsRelink;
 
   const handleDelete = async () => {
     if (
@@ -93,6 +100,11 @@ export function CoursePage() {
                 >
                   Resume course
                 </Link>
+              )}
+              {showRelinkButton && (
+                <Button variant="outline" onClick={() => setRelinkOpen(true)}>
+                  Relink course
+                </Button>
               )}
               <Button variant="outline" onClick={handleDelete}>
                 Remove course
@@ -149,6 +161,13 @@ export function CoursePage() {
           </div>
         </section>
       )}
+      <RelinkCourseDialog
+        open={relinkOpen}
+        onOpenChange={setRelinkOpen}
+        courseId={course.id}
+        courseTitle={course.title}
+        videos={course.videos}
+      />
     </div>
   );
 }

@@ -6,6 +6,8 @@
 
 import type { FileFingerprint } from './db'
 
+export type FileSource = FileSystemFileHandle | File
+
 const VIDEO_EXTENSIONS = [
   'mp4',
   'mkv',
@@ -26,14 +28,18 @@ export function naturalCompare(a: string, b: string) {
   return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
 }
 
-export async function getFileFingerprint(handle: FileSystemFileHandle): Promise<FileFingerprint> {
-  const file = await handle.getFile()
+export async function getFileFromSource(source: FileSource): Promise<File> {
+  if (source instanceof File) {
+    return source
+  }
+  return source.getFile()
+}
+
+export async function getFileFingerprint(source: FileSource): Promise<FileFingerprint> {
+  const file = await getFileFromSource(source)
   return {
     size: file.size,
     lastModified: file.lastModified,
+    name: file.name,
   }
-}
-
-export async function getFileFromHandle(handle: FileSystemFileHandle) {
-  return handle.getFile()
 }
