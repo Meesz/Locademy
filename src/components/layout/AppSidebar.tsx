@@ -1,39 +1,39 @@
-import { useState } from 'react'
-import { NavLink } from 'react-router-dom'
-import { Button } from '../ui/button'
-import { useLibrary } from '../../state/library-context'
-import { cn } from '../../lib/utils'
-import { hasDirectoryPicker } from '../../lib/browser'
+import { useState } from "react";
+import { NavLink } from "react-router";
+import { Button } from "../ui/button";
+import { useLibrary } from "../../state/library-context";
+import { cn } from "../../lib/utils";
+import { hasDirectoryPicker } from "../../lib/browser";
 
 function isAbortError(error: unknown) {
-  return error instanceof DOMException && error.name === 'AbortError'
+  return error instanceof DOMException && error.name === "AbortError";
 }
 
 export function AppSidebar() {
-  const { courses, importCourse } = useLibrary()
-  const [error, setError] = useState<string | null>(null)
-  const [importing, setImporting] = useState(false)
+  const { courses, importCourse } = useLibrary();
+  const [error, setError] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
 
   const handleImport = async () => {
     if (!hasDirectoryPicker(window)) {
-      setError('Your browser does not support directory access yet.')
-      return
+      setError("Your browser does not support directory access yet.");
+      return;
     }
 
     try {
-      setError(null)
-      setImporting(true)
-      const directoryHandle = await window.showDirectoryPicker()
-      await importCourse(directoryHandle)
+      setError(null);
+      setImporting(true);
+      const directoryHandle = await window.showDirectoryPicker();
+      await importCourse(directoryHandle);
     } catch (err) {
       if (!isAbortError(err)) {
-        console.error(err)
-        setError('Could not import folder. Please try again.')
+        console.error(err);
+        setError("Could not import folder. Please try again.");
       }
     } finally {
-      setImporting(false)
+      setImporting(false);
     }
-  }
+  };
 
   return (
     <aside className="flex h-full w-72 flex-col border-r border-slate-800 bg-slate-950/80 p-4 backdrop-blur-lg">
@@ -49,8 +49,8 @@ export function AppSidebar() {
             to="/"
             className={({ isActive }) =>
               cn(
-                'block rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-900/80 hover:text-white',
-                isActive && 'bg-sky-500/10 text-sky-200',
+                "block rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-900/80 hover:text-white",
+                isActive && "bg-sky-500/10 text-sky-200"
               )
             }
             end
@@ -61,8 +61,8 @@ export function AppSidebar() {
             to="/settings"
             className={({ isActive }) =>
               cn(
-                'block rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-900/80 hover:text-white',
-                isActive && 'bg-sky-500/10 text-sky-200',
+                "block rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-900/80 hover:text-white",
+                isActive && "bg-sky-500/10 text-sky-200"
               )
             }
           >
@@ -85,14 +85,16 @@ export function AppSidebar() {
                 to={`/courses/${course.id}`}
                 className={({ isActive }) =>
                   cn(
-                    'flex items-center justify-between rounded-lg px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-slate-900/80 hover:text-white',
-                    isActive && 'bg-sky-500/10 text-sky-200',
+                    "flex items-center justify-between rounded-lg px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-slate-900/80 hover:text-white",
+                    isActive && "bg-sky-500/10 text-sky-200"
                   )
                 }
               >
                 <span className="truncate">{course.title}</span>
                 <span className="text-xs text-slate-500">
-                  {course.modules.length > 0 ? `${course.modules.length} mod` : `${course.videos.length} videos`}
+                  {course.modules.length > 0
+                    ? `${course.modules.length} mod`
+                    : `${course.videos.length} videos`}
                 </span>
               </NavLink>
             ))}
@@ -103,5 +105,5 @@ export function AppSidebar() {
         Locademy stores everything locally. Your video files stay on disk.
       </p>
     </aside>
-  )
+  );
 }

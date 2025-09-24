@@ -1,17 +1,17 @@
-import { Link } from 'react-router-dom'
-import type { CourseWithRelations } from '../lib/types'
-import { computeCourseProgress } from '../lib/progress'
-import { usePosterUrl } from '../hooks/use-object-url'
-import { Progress } from './ui/progress'
-import { cn, formatDuration } from '../lib/utils'
+import { Link } from "react-router";
+import type { CourseWithRelations } from "../lib/types";
+import { computeCourseProgress } from "../lib/progress";
+import { usePosterUrl } from "../hooks/use-object-url";
+import { Progress } from "./ui/progress";
+import { cn, formatDuration } from "../lib/utils";
 
 interface CourseCardProps {
-  course: CourseWithRelations
+  course: CourseWithRelations;
 }
 
 export function CourseCard({ course }: CourseCardProps) {
-  const posterUrl = usePosterUrl(course.coverBlobKey)
-  const progress = computeCourseProgress(course)
+  const posterUrl = usePosterUrl(course.coverBlobKey);
+  const progress = computeCourseProgress(course);
 
   return (
     <Link
@@ -32,7 +32,11 @@ export function CourseCard({ course }: CourseCardProps) {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent" />
         <div className="absolute bottom-3 left-3 flex items-center gap-2 text-xs text-slate-300">
-          <span>{course.modules.length > 0 ? `${course.modules.length} modules` : `${course.videos.length} videos`}</span>
+          <span>
+            {course.modules.length > 0
+              ? `${course.modules.length} modules`
+              : `${course.videos.length} videos`}
+          </span>
           {progress.totalDuration > 0 && (
             <span className="flex items-center gap-1 text-slate-400">
               • {formatDuration(progress.totalDuration)} total
@@ -44,7 +48,9 @@ export function CourseCard({ course }: CourseCardProps) {
         <div>
           <h3 className="text-lg font-semibold text-white">{course.title}</h3>
           {course.description && (
-            <p className="line-clamp-2 text-sm text-slate-400">{course.description}</p>
+            <p className="line-clamp-2 text-sm text-slate-400">
+              {course.description}
+            </p>
           )}
         </div>
         <div className="mt-auto space-y-2">
@@ -53,12 +59,17 @@ export function CourseCard({ course }: CourseCardProps) {
             <span>
               {progress.completedVideos} / {progress.totalVideos} completed
             </span>
-            <span className={cn('text-slate-400', progress.percent === 100 && 'text-emerald-300')}>
+            <span
+              className={cn(
+                "text-slate-400",
+                progress.percent === 100 && "text-emerald-300"
+              )}
+            >
               {progress.percent}%
             </span>
           </div>
         </div>
       </div>
     </Link>
-  )
+  );
 }

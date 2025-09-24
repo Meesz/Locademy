@@ -1,18 +1,20 @@
-import { Link } from 'react-router-dom'
-import type { ContinueWatchingItem } from '../lib/selectors'
-import { formatDuration } from '../lib/utils'
-import { Progress } from './ui/progress'
-import { usePosterUrl } from '../hooks/use-object-url'
+import { Link } from "react-router";
+import type { ContinueWatchingItem } from "../lib/selectors";
+import { formatDuration } from "../lib/utils";
+import { Progress } from "./ui/progress";
+import { usePosterUrl } from "../hooks/use-object-url";
 
 interface ContinueWatchingCardProps {
-  item: ContinueWatchingItem
+  item: ContinueWatchingItem;
 }
 
 export function ContinueWatchingCard({ item }: ContinueWatchingCardProps) {
-  const { course, video } = item
-  const progress = video.progress
-  const posterUrl = usePosterUrl(video.posterBlobKey)
-  const resumeFrom = progress ? formatDuration(Math.floor(progress.lastPositionSec)) : '0:00'
+  const { course, video } = item;
+  const progress = video.progress;
+  const posterUrl = usePosterUrl(video.posterBlobKey);
+  const resumeFrom = progress
+    ? formatDuration(Math.floor(progress.lastPositionSec))
+    : "0:00";
 
   return (
     <Link
@@ -37,13 +39,27 @@ export function ContinueWatchingCard({ item }: ContinueWatchingCardProps) {
         </span>
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
-        <p className="text-xs uppercase tracking-wide text-slate-400">{course.title}</p>
-        <h3 className="line-clamp-2 text-sm font-semibold text-white">{video.title}</h3>
+        <p className="text-xs uppercase tracking-wide text-slate-400">
+          {course.title}
+        </p>
+        <h3 className="line-clamp-2 text-sm font-semibold text-white">
+          {video.title}
+        </h3>
         <div className="mt-auto space-y-1">
-          <Progress value={progress?.completed ? 100 : (progress ? (video.durationSec ? (progress.lastPositionSec / video.durationSec) * 100 : 0) : 0)} />
+          <Progress
+            value={
+              progress?.completed
+                ? 100
+                : progress
+                ? video.durationSec
+                  ? (progress.lastPositionSec / video.durationSec) * 100
+                  : 0
+                : 0
+            }
+          />
           <p className="text-xs text-slate-500">Continue watching</p>
         </div>
       </div>
     </Link>
-  )
+  );
 }

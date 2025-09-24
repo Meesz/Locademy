@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from "react-router";
 
 export function AppTopBar() {
   return (
@@ -13,5 +13,5 @@ export function AppTopBar() {
         <span>IndexedDB + File System Access</span>
       </div>
     </header>
-  )
+  );
 }

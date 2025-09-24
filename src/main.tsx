@@ -4,15 +4,15 @@
  * @author Meesz
  */
 
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import App from './App'
-import './index.css'
-import { LibraryProvider } from './state/library-context'
-import { SettingsProvider } from './state/settings-context'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router";
+import App from "./App";
+import "./index.css";
+import { LibraryProvider } from "./state/library-context";
+import { SettingsProvider } from "./state/settings-context";
 
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <SettingsProvider>
@@ -21,5 +21,5 @@ createRoot(document.getElementById('root')!).render(
         </LibraryProvider>
       </SettingsProvider>
     </BrowserRouter>
-  </StrictMode>,
-)
+  </StrictMode>
+);

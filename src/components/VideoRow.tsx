@@ -1,23 +1,26 @@
-import { Link } from 'react-router-dom'
-import type { VideoWithRelations } from '../lib/types'
-import { formatDuration } from '../lib/utils'
-import { Badge } from './ui/badge'
-import { Progress } from './ui/progress'
+import { Link } from "react-router";
+import type { VideoWithRelations } from "../lib/types";
+import { formatDuration } from "../lib/utils";
+import { Badge } from "./ui/badge";
+import { Progress } from "./ui/progress";
 
 interface VideoRowProps {
-  courseId: string
-  video: VideoWithRelations
-  index: number
+  courseId: string;
+  video: VideoWithRelations;
+  index: number;
 }
 
 export function VideoRow({ courseId, video, index }: VideoRowProps) {
-  const { progress } = video
-  const completed = progress?.completed ?? false
+  const { progress } = video;
+  const completed = progress?.completed ?? false;
   const progressPercent = completed
     ? 100
     : progress && video.durationSec
-      ? Math.min(100, Math.round((progress.lastPositionSec / video.durationSec) * 100))
-      : 0
+    ? Math.min(
+        100,
+        Math.round((progress.lastPositionSec / video.durationSec) * 100)
+      )
+    : 0;
 
   return (
     <Link
@@ -26,23 +29,28 @@ export function VideoRow({ courseId, video, index }: VideoRowProps) {
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <span className="mt-1 text-xs text-slate-500">{String(index + 1).padStart(2, '0')}</span>
+          <span className="mt-1 text-xs text-slate-500">
+            {String(index + 1).padStart(2, "0")}
+          </span>
           <div>
             <p className="text-sm font-medium text-white">{video.title}</p>
             <p className="text-xs text-slate-400">
-              {video.durationSec ? formatDuration(video.durationSec) : 'Unknown duration'}
+              {video.durationSec
+                ? formatDuration(video.durationSec)
+                : "Unknown duration"}
             </p>
           </div>
         </div>
         {completed ? (
           <Badge variant="success">Completed</Badge>
         ) : (
-          progress && progress.lastPositionSec > 0 && (
+          progress &&
+          progress.lastPositionSec > 0 && (
             <Badge variant="outline">Resume</Badge>
           )
         )}
       </div>
       <Progress value={progressPercent} />
     </Link>
-  )
+  );
 }
