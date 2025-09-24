@@ -1,3 +1,9 @@
+/**
+ * @file file-utils.ts
+ * @description Helpers for identifying supported video files and building standardized file metadata fingerprints.
+ * @author Meesz
+ */
+
 import type { FileFingerprint } from './db'
 
 const VIDEO_EXTENSIONS = [

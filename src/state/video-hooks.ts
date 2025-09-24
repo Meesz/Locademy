@@ -1,3 +1,9 @@
+/**
+ * @file video-hooks.ts
+ * @description Hooks for retrieving single video entities with optional related records via Dexie.
+ * @author Meesz
+ */
+
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, type VideoEntity } from '../lib/db'
 import type { VideoWithRelations } from '../lib/types'

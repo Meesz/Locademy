@@ -1,3 +1,9 @@
+/**
+ * @file thumbnail-service.ts
+ * @description Thumbnail capture utilities for generating preview stills and storing them for reuse.
+ * @author Meesz
+ */
+
 import { storePosterBlob } from './video-service'
 
 export interface ThumbnailOptions {

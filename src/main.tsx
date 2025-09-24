@@ -1,3 +1,9 @@
+/**
+ * @file main.tsx
+ * @description React entry point that wires up providers and renders the application.
+ * @author Meesz
+ */
+
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'

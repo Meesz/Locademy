@@ -1,3 +1,9 @@
+/**
+ * @file db.ts
+ * @description Dexie database configuration and entity interfaces backing Locademy's persistent IndexedDB storage.
+ * @author Meesz
+ */
+
 import Dexie, { type Table } from 'dexie'
 
 export interface FileFingerprint {

@@ -1,3 +1,9 @@
+/**
+ * @file DashboardPage.tsx
+ * @description Home dashboard displaying continue-watching items and course overview grid.
+ * @author Meesz
+ */
+
 import { useLibrary } from '../state/library-context'
 import { selectContinueWatching } from '../lib/selectors'
 import { ContinueWatchingCard } from '../components/ContinueWatchingCard'

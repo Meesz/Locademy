@@ -1,3 +1,9 @@
+/**
+ * @file file-system.d.ts
+ * @description Ambient type augmentations for File System Access API usage within Locademy.
+ * @author Meesz
+ */
+
 interface FileSystemDirectoryHandle {
   entries(): AsyncIterableIterator<[string, FileSystemHandle]>
   values(): AsyncIterableIterator<FileSystemHandle>

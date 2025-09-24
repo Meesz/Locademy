@@ -1,3 +1,9 @@
+/**
+ * @file CoursePage.tsx
+ * @description Course detail screen providing progress stats and module/video listings.
+ * @author Meesz
+ */
+
 import { useMemo } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLibrary } from '../state/library-context'

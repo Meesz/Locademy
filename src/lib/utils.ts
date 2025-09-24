@@ -1,3 +1,9 @@
+/**
+ * @file utils.ts
+ * @description Collection of shared utility helpers for formatting, class merging, and ID generation within the Locademy frontend.
+ * @author Meesz
+ */
+
 import { clsx, type ClassValue } from 'clsx'
 
 export function cn(...inputs: ClassValue[]) {

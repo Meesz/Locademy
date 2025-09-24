@@ -1,3 +1,9 @@
+/**
+ * @file constants.ts
+ * @description Centralized configuration constants governing Locademy's playback and progress behaviour.
+ * @author Meesz
+ */
+
 import type { AppSettings } from './types'
 
 export const DEFAULT_COMPLETION_THRESHOLD = 0.9

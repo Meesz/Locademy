@@ -1,3 +1,9 @@
+/**
+ * @file settings-context.tsx
+ * @description React context for accessing and mutating application settings with live Dexie-backed updates.
+ * @author Meesz
+ */
+
 import {
   createContext,
   useCallback,

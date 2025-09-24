@@ -1,3 +1,9 @@
+/**
+ * @file PlayerPage.tsx
+ * @description Video playback surface handling resume logic, progress tracking, relinking, and notes.
+ * @author Meesz
+ */
+
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLibrary } from '../state/library-context'

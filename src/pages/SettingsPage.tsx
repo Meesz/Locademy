@@ -1,3 +1,9 @@
+/**
+ * @file SettingsPage.tsx
+ * @description Settings interface for adjusting Locademy's completion thresholds and playback behavior.
+ * @author Meesz
+ */
+
 import { useEffect, useState } from 'react'
 import { useSettings } from '../state/settings-context'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'

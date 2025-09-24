@@ -1,3 +1,9 @@
+/**
+ * @file selectors.ts
+ * @description Derived selectors for building dashboard collections such as the continue watching list.
+ * @author Meesz
+ */
+
 import type { CourseWithRelations, VideoWithRelations } from './types'
 import { RESUME_THRESHOLD_SECONDS } from './constants'
 

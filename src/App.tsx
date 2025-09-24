@@ -1,3 +1,9 @@
+/**
+ * @file App.tsx
+ * @description Application route map defining high-level pages under the shared layout.
+ * @author Meesz
+ */
+
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from './components/layout/AppLayout'
 import { DashboardPage } from './pages/DashboardPage'

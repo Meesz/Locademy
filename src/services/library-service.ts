@@ -1,3 +1,9 @@
+/**
+ * @file library-service.ts
+ * @description High-level course import pipeline and reactive queries for the Locademy media library.
+ * @author Meesz
+ */
+
 import { liveQuery } from 'dexie'
 import { db, type CourseEntity, type ModuleEntity, type VideoEntity } from '../lib/db'
 import { createId, humanizeName } from '../lib/utils'

@@ -1,3 +1,9 @@
+/**
+ * @file relink-service.ts
+ * @description Handles updating video records when the underlying file location changes.
+ * @author Meesz
+ */
+
 import { updateVideo } from './video-service'
 import { getFileFingerprint } from '../lib/file-utils'
 

@@ -1,3 +1,9 @@
+/**
+ * @file types.ts
+ * @description Shared TypeScript types describing higher-level course structures and settings across the application.
+ * @author Meesz
+ */
+
 import type {
   CourseEntity,
   ModuleEntity,

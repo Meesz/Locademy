@@ -1,3 +1,9 @@
+/**
+ * @file video-service.ts
+ * @description Video metadata helpers for handle validation, poster blob storage, and reactive lookups.
+ * @author Meesz
+ */
+
 import { liveQuery } from 'dexie'
 import { db, type StoredBlobEntity, type VideoEntity } from '../lib/db'
 import { createId } from '../lib/utils'

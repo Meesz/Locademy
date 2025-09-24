@@ -1,3 +1,9 @@
+/**
+ * @file progress-service.ts
+ * @description Service utilities for querying and updating video playback progress in IndexedDB.
+ * @author Meesz
+ */
+
 import { liveQuery } from 'dexie'
 import { db, type VideoProgressEntity } from '../lib/db'
 

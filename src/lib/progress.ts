@@ -1,3 +1,9 @@
+/**
+ * @file progress.ts
+ * @description Utility functions for calculating video and course progress metrics used across the UI.
+ * @author Meesz
+ */
+
 import type { CourseWithRelations, VideoWithRelations } from './types'
 
 export interface CourseProgressSummary {

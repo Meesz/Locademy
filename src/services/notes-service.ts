@@ -1,3 +1,9 @@
+/**
+ * @file notes-service.ts
+ * @description CRUD helpers for storing and streaming markdown notes per video.
+ * @author Meesz
+ */
+
 import { liveQuery } from 'dexie'
 import { db, type VideoNoteEntity } from '../lib/db'
 

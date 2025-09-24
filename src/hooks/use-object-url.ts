@@ -1,3 +1,9 @@
+/**
+ * @file use-object-url.ts
+ * @description React hooks for managing object URLs and loading stored poster blobs.
+ * @author Meesz
+ */
+
 import { useEffect, useState } from 'react'
 import { loadPosterBlob } from '../services/video-service'
 

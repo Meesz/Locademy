@@ -1,3 +1,9 @@
+/**
+ * @file settings-service.ts
+ * @description Persistence helpers for reading and mutating Locademy's user-configurable settings.
+ * @author Meesz
+ */
+
 import { liveQuery } from 'dexie'
 import { db, type SettingEntity } from '../lib/db'
 import { DEFAULT_SETTINGS } from '../lib/constants'

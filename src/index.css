@@ -1,3 +1,9 @@
+/*
+ * @file index.css
+ * @description Tailwind entry stylesheet defining base theme tokens and utility extensions for Locademy.
+ * @author Meesz
+ */
+
 @import "tailwindcss";
 
 @layer base {

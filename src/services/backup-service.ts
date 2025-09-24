@@ -1,3 +1,9 @@
+/**
+ * @file backup-service.ts
+ * @description Export stubs for future backup and restore functionality within Locademy.
+ * @author Meesz
+ */
+
 import { db, type CourseEntity, type ModuleEntity, type VideoEntity, type VideoProgressEntity, type VideoNoteEntity, type SettingEntity } from '../lib/db'
 
 export interface BackupManifest {
