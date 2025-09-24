@@ -1,4 +1,4 @@
-![Locademy logo](./src/assets/logo.avif)
+![Locademy logo](./public/logo.avif)
 
 # Locademy
 
