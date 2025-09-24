@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.github/copilot-instructions.md
+local_course_tracker_blueprint_v2.md
+.env
